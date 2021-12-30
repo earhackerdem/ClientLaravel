@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -26,13 +28,34 @@ class AuthenticatedSessionController extends Controller
      * @param  \App\Http\Requests\Auth\LoginRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(LoginRequest $request)
+    public function store(Request $request)
     {
-        $request->authenticate();
+        $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string'
+        ]);
 
-        $request->session()->regenerate();
+        $response = Http::withHeaders([
+            'Accept'=>'application/json'
+            ])
+            ->post(env('API_URL').'/api/v1/login',[
+                'email' => $request->email,
+                'password' => $request->password
+            ]);
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        $response = $response->json();
+
+        $user = User::updateOrCreate([
+         'email' => $request->email,
+        ],$response['data']);
+
+        return $user;
+
+        // $request->authenticate();
+
+        // $request->session()->regenerate();
+
+        // return redirect()->intended(RouteServiceProvider::HOME);
     }
 
     /**
