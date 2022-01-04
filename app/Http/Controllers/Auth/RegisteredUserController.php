@@ -9,6 +9,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
@@ -39,10 +40,39 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        $response = Http::withHeaders([
+            'accept' => 'application/json'
+        ])->post(env('API_URL').'/api/v1/register',$request->all());
+
+        if($response->status() ===422){
+            return back()->withErrors($response->json()['errors']);
+        }
+
+        $service = $response->json();
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+        ]);
+
+        $response = Http::withHeaders([
+            'Accept' => 'application/json'
+        ])
+            ->post(env('API_URL') . '/oauth/token', [
+                'grant_type' => 'password',
+                'client_id' => '95459940-8e71-4eb7-9ec9-32538236cc57',
+                'client_secret' => 'JnemVsr238agqP5iFDqFM5Djg3gi7XY0n1sXamEl',
+                'username' => $request->email,
+                'password' => $request->password,
+            ]);
+
+        $access_token = $response->json();
+
+        $user->accessToken()->create([
+            'service_id' => $service['data']['id'],
+            'access_token' => $access_token['access_token'],
+            'refresh_token' => $access_token['refresh_token'],
+            'expires_at' => now()->addSecond($access_token['expires_in'])
         ]);
 
         event(new Registered($user));
