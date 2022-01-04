@@ -11,12 +11,14 @@ class PostController extends Controller
     public function store()
     {
 
+        $this->resolveAuthorization();
+
         $response = Http::withHeaders([
             'accept' => 'application/json',
             'authorization' => 'Bearer ' . auth()->user()->accessToken->access_token
         ])->post(env('API_URL') . '/api/v1/posts', [
             'name' => 'Este es un nombre de prueba',
-            'slug' => 'Este-es-un-nombre-de-prueba',
+            'slug' => 'Este-es-un-nombre-de-pruebas',
             'extract' => 'asdfasdfasdf',
             'body' => 'asdfasdfasdf',
             'category_id' => '1',
