@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use App\Traits\TokenTrait;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
 {
+    use TokenTrait;
     /**
      * Display the registration view.
      *
@@ -55,25 +57,7 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
         ]);
 
-        $response = Http::withHeaders([
-            'Accept' => 'application/json'
-        ])
-            ->post(env('API_URL') . '/oauth/token', [
-                'grant_type' => 'password',
-                'client_id' => config('services.api.client_id'),
-                'client_secret' => config('services.api.client_secret'),
-                'username' => $request->email,
-                'password' => $request->password,
-            ]);
-
-        $access_token = $response->json();
-
-        $user->accessToken()->create([
-            'service_id' => $service['data']['id'],
-            'access_token' => $access_token['access_token'],
-            'refresh_token' => $access_token['refresh_token'],
-            'expires_at' => now()->addSecond($access_token['expires_in'])
-        ]);
+        $this->getAccessToken($user, $service);
 
         event(new Registered($user));
 
