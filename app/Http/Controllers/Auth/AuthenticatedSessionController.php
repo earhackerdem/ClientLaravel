@@ -53,14 +53,14 @@ class AuthenticatedSessionController extends Controller
             'email' => $request->email,
         ], $service['data']);
 
-        if (!$user->accessToken()->count()) {
+        if (!$user->accessToken) {
             $response = Http::withHeaders([
                 'Accept' => 'application/json'
             ])
                 ->post(env('API_URL') . '/oauth/token', [
                     'grant_type' => 'password',
-                    'client_id' => '953b4437-584a-4fa0-9b0d-c126da02fdc9',
-                    'client_secret' => '8UTLLL7pQ4igQ57x9P9Mn9FRMNRHxEEvEbJwIP8u',
+                    'client_id' => '95459940-8e71-4eb7-9ec9-32538236cc57',
+                    'client_secret' => 'JnemVsr238agqP5iFDqFM5Djg3gi7XY0n1sXamEl',
                     'username' => $request->email,
                     'password' => $request->password,
                 ]);
