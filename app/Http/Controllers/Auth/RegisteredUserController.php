@@ -60,8 +60,8 @@ class RegisteredUserController extends Controller
         ])
             ->post(env('API_URL') . '/oauth/token', [
                 'grant_type' => 'password',
-                'client_id' => '95459940-8e71-4eb7-9ec9-32538236cc57',
-                'client_secret' => 'JnemVsr238agqP5iFDqFM5Djg3gi7XY0n1sXamEl',
+                'client_id' => config('services.api.client_id'),
+                'client_secret' => config('services.api.client_secret'),
                 'username' => $request->email,
                 'password' => $request->password,
             ]);
