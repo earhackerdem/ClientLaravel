@@ -56,7 +56,7 @@ class AuthenticatedSessionController extends Controller
         ], $service['data']);
 
         if (!$user->accessToken) {
-            $this->getAccessToken($user, $service);
+            $this->setAccessToken($user, $service);
         }
 
         Auth::login($user, $request->remember);

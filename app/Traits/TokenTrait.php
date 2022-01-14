@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Http;
 trait TokenTrait
 {
 
-    public function getAccessToken($user, $service)
+    public function setAccessToken($user, $service)
     {
         $response = Http::withHeaders([
             'Accept' => 'application/json'
@@ -17,7 +17,9 @@ trait TokenTrait
                 'client_id' => config('services.api.client_id'),
                 'client_secret' => config('services.api.client_secret'),
                 'username' => request('email'),
-                'password' => request('password')
+                'password' => request('password'),
+                'scope' => 'create-post read-post update-post delete-post'
+                // 'scopes' => '*'
             ]);
 
         $access_token = $response->json();
